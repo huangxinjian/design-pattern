@@ -6,7 +6,7 @@ public class VirtualWalletEntity {
 
     private Long id;
     private Long createTime;
-    private BigDecimal amount;
+    private BigDecimal balance;
 
     public Long getId() {
         return id;
@@ -24,11 +24,12 @@ public class VirtualWalletEntity {
         this.createTime = createTime;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public BigDecimal getBalance() {
+        return balance;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
+
 }
