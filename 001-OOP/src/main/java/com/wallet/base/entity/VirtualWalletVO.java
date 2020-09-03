@@ -1,8 +1,8 @@
-package com.wallet.anemia.virtual.entity;
+package com.wallet.base.entity;
 
 import java.math.BigDecimal;
 
-public class VirtualWalletEntity {
+public class VirtualWalletVO {
 
     private Long id;
     private Long createTime;

@@ -1,4 +1,4 @@
-package com.wallet.anemia.virtual.repository;
+package com.wallet.base.repository;
 
 import org.springframework.stereotype.Repository;
 

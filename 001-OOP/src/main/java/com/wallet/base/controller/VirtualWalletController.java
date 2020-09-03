@@ -1,4 +1,4 @@
-package com.wallet.anemia.virtual.controller;
+package com.wallet.base.controller;
 
 
 import com.wallet.anemia.virtual.service.VirtualWalletService;
