@@ -1,5 +1,7 @@
 package com.wallet.base.repository;
 
+import com.wallet.base.entity.VirtualWalletTransactionEntity;
+import com.wallet.base.status.Status;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -7,4 +9,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface VirtualWalletTransactionRepository {
+    Long saveTransaction(VirtualWalletTransactionEntity transactionEntity);
+
+    void updateStatus(Long transactionId, Status status);
 }

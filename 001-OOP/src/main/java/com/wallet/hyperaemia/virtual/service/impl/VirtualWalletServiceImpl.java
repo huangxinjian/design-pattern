@@ -1,19 +1,23 @@
-package com.wallet.anemia.virtual.service.impl;
+package com.wallet.hyperaemia.virtual.service.impl;
 
 import com.wallet.anemia.virtual.entity.VirtualWalletBO;
 import com.wallet.base.entity.VirtualWalletEntity;
 import com.wallet.base.entity.VirtualWalletTransactionEntity;
+import com.wallet.base.exception.InvalidAmountException;
 import com.wallet.base.exception.NoSufficientBalanceException;
 import com.wallet.base.repository.VirtualWalletRepository;
 import com.wallet.base.repository.VirtualWalletTransactionRepository;
-import com.wallet.anemia.virtual.service.VirtualWalletService;
 import com.wallet.base.status.Status;
+import com.wallet.hyperaemia.virtual.domain.VirtualWallet;
+import com.wallet.hyperaemia.virtual.service.VirtualWalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-@Service
+/**
+ * 在充血模型中，service是很轻的
+ * 主要通过调用 domain 模型中的方法来实现业务，是一种纯面向对象的思想
+ */
 public class VirtualWalletServiceImpl implements VirtualWalletService {
 
     @Autowired
@@ -27,10 +31,10 @@ public class VirtualWalletServiceImpl implements VirtualWalletService {
      * @param walletId 虚拟钱包 id
      * @return 虚拟钱包
      */
-    public VirtualWalletBO getVirtualWallet(Long walletId) {
+    public VirtualWallet getVirtualWallet(Long walletId) {
         VirtualWalletEntity walletEntity = walletRepo.getWalletEntity(walletId);
-        VirtualWalletBO walletBo = convert(walletEntity);
-        return walletBo;
+        VirtualWallet wallet = convert(walletEntity);
+        return wallet;
     }
 
     /**
@@ -50,13 +54,10 @@ public class VirtualWalletServiceImpl implements VirtualWalletService {
      */
     public void debit(Long walletId, BigDecimal amount) throws NoSufficientBalanceException {
         VirtualWalletEntity walletEntity = walletRepo.getWalletEntity(walletId);
-        // 更新余额：这些都属于业务操作，在 DDD 中会抽离到充血模型中
-        BigDecimal balance = walletEntity.getBalance();
-        if (balance.compareTo(amount) < 0) {
-            throw new NoSufficientBalanceException("余额不足，操作失败！");
-        }
-        BigDecimal res = balance.subtract(amount);
-        walletRepo.updateBalance(walletId, res);
+        VirtualWallet wallet = convert(walletEntity);
+        // 调用充血模型业务方法
+        wallet.debit(amount);
+        walletRepo.updateBalance(walletId, wallet.getBalance());
     }
 
     /**
@@ -64,13 +65,12 @@ public class VirtualWalletServiceImpl implements VirtualWalletService {
      * @param walletId
      * @param amount
      */
-    public void credit(Long walletId, BigDecimal amount) {
+    public void credit(Long walletId, BigDecimal amount) throws InvalidAmountException {
         VirtualWalletEntity walletEntity = walletRepo.getWalletEntity(walletId);
-        // 这一行就是业务代码，获取余额并添加, 可以抽离到 Domain 中
-        BigDecimal balance = walletEntity.getBalance();
-        BigDecimal res = balance.add(amount);
-        // 更新余额，在 DDD 中抽离到 Domain 中
-        walletRepo.updateBalance(walletId, res);
+        VirtualWallet wallet = convert(walletEntity);
+        // 调用充血模型业务方法
+        wallet.credit(amount);
+        walletRepo.updateBalance(walletId, wallet.getBalance());
     }
 
     public void transfer(Long fromWalletId, Long toWalletId, BigDecimal amount){
@@ -88,7 +88,7 @@ public class VirtualWalletServiceImpl implements VirtualWalletService {
         } catch (NoSufficientBalanceException e) {
             transactionRepo.updateStatus(transactionId, Status.CLOSED);
             return;
-        } catch (Exception e) {
+        } catch (Exception | InvalidAmountException e) {
             transactionRepo.updateStatus(transactionId, Status.FAILED);
             return;
         }
@@ -96,8 +96,7 @@ public class VirtualWalletServiceImpl implements VirtualWalletService {
     }
 
 
-    private VirtualWalletBO convert(VirtualWalletEntity walletEntity) {
+    private VirtualWallet convert(VirtualWalletEntity walletEntity) {
         return null;
     }
-
 }
